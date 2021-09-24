@@ -13,3 +13,5 @@ helloRouter.post("/user", hashPassword, addUser)
 helloRouter.patch("/user", updateUser)
 helloRouter.delete("/user/:email", deleteUser)
 helloRouter.post("/user/login", decryptPassword, findUser)
+
+module.exports = helloRouter
