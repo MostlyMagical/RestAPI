@@ -1,4 +1,5 @@
 const {User} = require("../models")
+const bcrypt = require("bcryptjs")
 
 exports.addUser = async (req, res) => {
     try {
@@ -11,10 +12,14 @@ exports.addUser = async (req, res) => {
     }
 }
 
-exports.findUser = async (req,res) => {
+exports.login = async (req,res) => {
     try{
-        const list = await User.find({})
-        res.status(200).send({allUsers: list})
+        const user = await User.findOne({email: req.body.email })
+        if (await bcrypt.compare(req.body.password, user.password)) {
+        res.status(200).send({user, message: "login successful"})
+        } else {
+            throw new Error()
+        }
     } catch(error) {
         res.status(500).send({err: error})
     }
@@ -23,10 +28,10 @@ exports.findUser = async (req,res) => {
 exports.updateUser = async (req, res) => {
     try{
         await User.updateOne(
-            {name: req.body.filter},
-            {$Set: {watched: req.body.update}}
+            {email: req.body.email},
+            {$Set: {[req.body.key]: req.body.update}}
         )
-        res.status(200).send({user: update, email: req.params.email, message: "successfully updated Email"})
+        res.status(200).send({message: "successfully updated Email"})
     } catch(error) {
         res.status(500).send({err: error})
     }
@@ -34,8 +39,8 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
     try {
-        const destroy = await User.findOneAndDelete({email: req.params.email})
-        res.status(200).send({user: destroy, email: req.params.email, message: `${email}'s account has been destroyed'`})
+        await User.deleteOne({email: req.params.email})
+        res.status(200).send({message: `${email}'s account has been destroyed'`})
     } catch (error) {
         res.status(500).send({err: error})
     }
